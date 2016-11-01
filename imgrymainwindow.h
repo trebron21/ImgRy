@@ -2,9 +2,11 @@
 #define IMGRYMAINWINDOW_H
 
 #include <QMainWindow>
-#include <QMutex>
+//#include <QMutex>
+#include <mutex>
 
-namespace Ui {
+namespace Ui
+{
   class ImgRyMainWindow;
 }
 
@@ -14,7 +16,7 @@ class ImgRyMainWindow : public QMainWindow
 
 
   public:
-    explicit ImgRyMainWindow(QWidget *parent = 0);
+    explicit ImgRyMainWindow(QWidget * parent = 0);
     ~ImgRyMainWindow();
 
     void writeTrace(QString text);
@@ -29,9 +31,11 @@ class ImgRyMainWindow : public QMainWindow
 
 
   private:
-    Ui::ImgRyMainWindow *ui;
+    Ui::ImgRyMainWindow * ui;
 
-    QMutex traceMtx;
+    std::mutex traceMutex;
+
+    std::vector<std::thread> threadPool;
 };
 
 #endif // IMGRYMAINWINDOW_H

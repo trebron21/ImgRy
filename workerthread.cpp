@@ -22,19 +22,38 @@
 
 //using namespace Magick;
 
+#include <thread>
+#include <sstream>
+
+#include <QDebug>
+
+WorkerThread::WorkerThread(ImgRyMainWindow & wnd) :
+  imgWnd(wnd)
+{ /* empty */ }
+
+
+WorkerThread::~WorkerThread()
+{ /* empty */ }
+
+
 void WorkerThread::run()
 {
   int numOfFiles = 0;
   while (0 < (numOfFiles = imgWnd.filePaths.size()))
   {
-    QString tid = QString::number(id);
+    auto myId = std::this_thread::get_id();
+    std::stringstream sstr;
+    sstr << myId;
+    QString threadIdString = sstr.str().c_str();
+
     QTime begin = QTime::currentTime();
-    emit emitTrace(tid + QString(" | Num of remaining files: ") + QString::number(numOfFiles));
+
+    emit emitTrace(threadIdString + QString(" | Num of remaining files: ") + QString::number(numOfFiles));
 
     QString filePath;
 
     {
-      QMutexLocker lock(&filePathsMtx);
+      std::lock_guard<std::mutex> lock(filePathsMtx);
       if (0 < (numOfFiles = imgWnd.filePaths.size()))
         filePath = imgWnd.filePaths.takeFirst();
     }
@@ -46,7 +65,7 @@ void WorkerThread::run()
 
     if(!image->load(filePath))
     {
-      emit emitTrace(tid + QString(" | Could not read image: ") + filePath);
+      emit emitTrace(threadIdString + QString(" | Could not read image: ") + filePath);
     }
 
     *image = image->scaledToHeight(image->height() / 5, Qt::SmoothTransformation);
@@ -56,15 +75,15 @@ void WorkerThread::run()
 
     if(!image->save(filePath))
     {
-      emit emitTrace(tid + QString(" | Could not save image"));
+      emit emitTrace(threadIdString + QString(" | Could not save image"));
     }
 
     delete image;
 
     int duration = begin.elapsed();
 
-    emit emitTrace(tid + QString(" | Writing file: ") + filePath);
-    emit emitTrace(tid + QString(" | Duration: ") + QString::number(duration) + "ms");
+    emit emitTrace(threadIdString + QString(" | Writing file: ") + filePath);
+    emit emitTrace(threadIdString + QString(" | Duration: ") + QString::number(duration) + "ms");
   }
 }
 
