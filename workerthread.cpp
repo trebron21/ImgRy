@@ -65,18 +65,17 @@ void WorkerThread::run()
 //      emit emitTrace(threadIdString + QString(" | Could not read image: ") + filePath);
     }
 
-    image = image.scaledToHeight(image.height() / 2, Qt::SmoothTransformation);
+    image = image.scaledToHeight(image.height() / 3, Qt::SmoothTransformation);
 
     QString dot = ".";
     filePath.insert(filePath.lastIndexOf(dot), "_1");
 
-    std::lock_guard<std::mutex> lock(fileSaveMutex);
     if (!image.save(filePath))
     {
 //      emit emitTrace(threadIdString + QString(" | Could not save image"));
     }
 
-    qInfo() << threadIdString.toStdString().c_str() << " filepath: " << filePath;
+//    qInfo() << threadIdString.toStdString().c_str() << " filepath: " << filePath;
 
 //    delete image;
 //    image = nullptr;

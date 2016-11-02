@@ -17,7 +17,6 @@ ImgRyMainWindow::ImgRyMainWindow(QWidget *parent) :
 
 ImgRyMainWindow::~ImgRyMainWindow()
 {
-  std::for_each(threadPool.begin(), threadPool.end(), std::mem_fn(&std::thread::join));
   delete ui;
 }
 
@@ -46,17 +45,18 @@ void ImgRyMainWindow::on_btnConvert_clicked()
     }
   }
 
-  const int thrCnt = 3;
-
-  WorkerThread worker(*this);
+  WorkerThread * worker = new WorkerThread(*this); // this memleak has to be fixed, but worker must not be a local variable, because it could go out of scope before the threads finish
+  int const thrCnt = 3;
 
   // Launch a group of threads
   for (int i = 0; i < thrCnt; ++i)
   {
     qInfo() << "starting thread: " <<  i;
-    threadPool.push_back(std::thread(&WorkerThread::run, &worker));
+    threadPool.push_back(std::thread(&WorkerThread::run, worker));
 //    threadPool.at(threadPool.size() - 1).detach();
 //    QObject::connect(&worker, SIGNAL(emitTrace(QString)), this, SLOT(realizeTrace(QString)), Qt::AutoConnection);
 //    QObject::connect(t[i], SIGNAL(finished()), t[i], SLOT(deleteLater()));
   }
+
+//  std::for_each(threadPool.begin(), threadPool.end(), std::mem_fn(&std::thread::join));
 }
