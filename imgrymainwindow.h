@@ -2,7 +2,7 @@
 #define IMGRYMAINWINDOW_H
 
 #include <QMainWindow>
-//#include <QMutex>
+#include <thread>
 #include <mutex>
 
 namespace Ui

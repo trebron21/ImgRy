@@ -1,26 +1,11 @@
 #include "imgrymainwindow.h"
 #include "ui_imgrymainwindow.h"
-
-#include <QDirIterator>
-//#include <QString>
-//#include <QVector>
-//#include <QQueue>
-#include <QTime>
-#include <thread>
-//#include <QMutexLocker>
-//#include <QThreadPool>
-
 #include "workerthread.h"
 
-//#include <Magick++.h>
-
-//#include <string>
-//#include <iostream>
-//#include <sstream>
-#include <thread>
-#include <mutex>
-
+#include <QDirIterator>
+#include <QTime>
 #include <QDebug>
+
 
 ImgRyMainWindow::ImgRyMainWindow(QWidget *parent) :
   QMainWindow(parent),
@@ -39,8 +24,9 @@ ImgRyMainWindow::~ImgRyMainWindow()
 
 void ImgRyMainWindow::realizeTrace(QString text)
 {
-  std::lock_guard<std::mutex> trcLocker(traceMutex);
-  ui->traceViewer->append(QTime::currentTime().toString() + " | " + text);
+//  std::lock_guard<std::mutex> trcLocker(traceMutex);
+  QMetaObject::invokeMethod(ui->traceViewer, "append", Qt::AutoConnection, Q_ARG(QString, QTime::currentTime().toString() + " | " + text));
+//  ui->traceViewer->append(QTime::currentTime().toString() + " | " + text);
 }
 
 
@@ -62,14 +48,15 @@ void ImgRyMainWindow::on_btnConvert_clicked()
 
   const int thrCnt = 3;
 
-  WorkerThread worker{*this};
+  WorkerThread worker(*this);
 
   // Launch a group of threads
   for (int i = 0; i < thrCnt; ++i)
   {
-    qInfo() << i;
+    qInfo() << "starting thread: " <<  i;
     threadPool.push_back(std::thread(&WorkerThread::run, &worker));
-    QObject::connect(&worker, SIGNAL(emitTrace(QString)), this, SLOT(realizeTrace(QString)));
+//    threadPool.at(threadPool.size() - 1).detach();
+//    QObject::connect(&worker, SIGNAL(emitTrace(QString)), this, SLOT(realizeTrace(QString)), Qt::AutoConnection);
 //    QObject::connect(t[i], SIGNAL(finished()), t[i], SLOT(deleteLater()));
   }
 }

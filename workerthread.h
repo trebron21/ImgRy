@@ -4,54 +4,28 @@
 #include "imgrymainwindow.h"
 #include "ui_imgrymainwindow.h"
 
-//#include <QDirIterator>
-//#include <QString>
-//#include <QVector>
-//#include <QQueue>
-//#include <QTime>
-//#include <QMutex>
-//#include <QMutexLocker>
-//#include <QThreadPool>
-#include <QThread>
+#include <thread>
+#include <mutex>
 
-//#include <Magick++.h>
-
-//#include <string>
-//#include <iostream>
-//#include <sstream>
-//#include <thread>
-//#include <mutex>
-
-class WorkerThread : public QThread
+class WorkerThread : public QObject
 {
   Q_OBJECT
 
-public:
-  WorkerThread(int Id, ImgRyMainWindow & wnd) : id(Id), imgWnd(wnd), m_stop(false)
-  {
-  }
+  public:
+    WorkerThread(ImgRyMainWindow & wnd);
+    ~WorkerThread();
 
-Q_SIGNALS:
-  void emitTrace(QString text);
+    void run();
 
-public slots:
-  void stop()
-  {
-//    qDebug()<<"Thread::stop called from main thread: "<<currentThreadId();
-    QMutexLocker locker(&m_mutex);
-    m_stop = true;
-  }
+  Q_SIGNALS:
+    void emitTrace(QString text);
 
-private:
-  int id;
-  ImgRyMainWindow& imgWnd;
-  QMutex m_mutex;
-  bool m_stop;
+  private:
+    ImgRyMainWindow& imgWnd;
 
-  QMutex traceMtx;
-  QMutex filePathsMtx;
+//    std::mutex filePathsMutex;
 
-  void run();
+//    int numOfFiles;
 };
 
 #endif // WORKERTHREAD
