@@ -9,15 +9,11 @@
 
 #include <thread>
 #include <sstream>
-#include <atomic>
 
-
-std::mutex filePathsMutex;
-std::mutex fileSaveMutex;
-std::atomic<int> numOfFiles = 0;
 
 WorkerThread::WorkerThread(ImgRyMainWindow & wnd) :
-  imgWnd(wnd)
+  imgWnd(wnd),
+  numOfFiles(0)
 { /* empty */ }
 
 
@@ -25,13 +21,8 @@ WorkerThread::~WorkerThread()
 { /* empty */ }
 
 
-void WorkerThread::run()
+void WorkerThread::run(uint8_t imageRatio)
 {
-  {
-    std::lock_guard<std::mutex> locker(filePathsMutex);
-    numOfFiles = imgWnd.filePaths.size();
-  }
-
   auto myId = std::this_thread::get_id();
   std::stringstream sstr;
   sstr << myId;
@@ -41,52 +32,43 @@ void WorkerThread::run()
   {
     QTime begin = QTime::currentTime();
 
-//    emit emitTrace(threadIdString + QString(" | Num of remaining files: ") + QString::number(numOfFiles));
-
     QString filePath = "";
 
     {
       std::lock_guard<std::mutex> lock(filePathsMutex);
 
       numOfFiles = imgWnd.filePaths.size();
-      qInfo() << threadIdString.toStdString().c_str() << " num of remaining files: " << numOfFiles;
 
-      if (!imgWnd.filePaths.isEmpty())
+      if (numOfFiles != 0)
         filePath = imgWnd.filePaths.takeFirst();
+
+      emit emitTrace(threadIdString + QString(" | Num of remaining files: ") + QString::number(numOfFiles));
     }
 
     if (!filePath.length())
       break;
 
-    QImage image;// = new QImage();
+    QImage image;
 
     if (!image.load(filePath))
     {
-//      emit emitTrace(threadIdString + QString(" | Could not read image: ") + filePath);
+      emit emitTrace(threadIdString + QString(" | Could not read image: ") + filePath);
     }
 
-    image = image.scaledToHeight(image.height() / 3, Qt::SmoothTransformation);
+    image = image.scaledToHeight(image.height() / imageRatio, Qt::SmoothTransformation);
 
     QString dot = ".";
     filePath.insert(filePath.lastIndexOf(dot), "_1");
 
     if (!image.save(filePath))
     {
-//      emit emitTrace(threadIdString + QString(" | Could not save image"));
+      emit emitTrace(threadIdString + QString(" | Could not save image"));
     }
 
-//    qInfo() << threadIdString.toStdString().c_str() << " filepath: " << filePath;
+    int duration = begin.elapsed();
 
-//    delete image;
-//    image = nullptr;
-
-//    int duration = begin.elapsed();
-
-//    qInfo() << threadIdString.toStdString().c_str() << " | Writing file: " << filePath.toStdString().c_str() << "\n"
-//            << threadIdString.toStdString().c_str() << " | Duration: " << duration << "ms";
-
-//    emit emitTrace(threadIdString + QString(" | Writing file: ") + filePath);
-//    emit emitTrace(threadIdString + QString(" | Duration: ") + QString::number(duration) + "ms");
+    emit emitTrace(threadIdString + QString(" | Writing file: ") + filePath);
+    emit emitTrace(threadIdString + QString(" | Duration: ") + QString::number(duration) + "ms");
   }
 }
 

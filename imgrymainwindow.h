@@ -4,6 +4,9 @@
 #include <QMainWindow>
 #include <thread>
 #include <mutex>
+#include <memory>
+
+class WorkerThread;
 
 namespace Ui
 {
@@ -34,6 +37,8 @@ class ImgRyMainWindow : public QMainWindow
     Ui::ImgRyMainWindow * ui;
 
     std::mutex traceMutex;
+
+    std::unique_ptr<WorkerThread> worker;
 
     std::vector<std::thread> threadPool;
 };

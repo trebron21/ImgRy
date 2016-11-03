@@ -68,9 +68,9 @@ QPushButton:hover:!pressed
     <property name="geometry">
      <rect>
       <x>100</x>
-      <y>50</y>
+      <y>70</y>
       <width>351</width>
-      <height>311</height>
+      <height>291</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -100,13 +100,13 @@ background-color: rgb(85, 170, 255)</string>
      <string/>
     </property>
     <property name="text">
-     <string/>
+     <string>d:\prv\pics\kepek\</string>
     </property>
     <property name="echoMode">
      <enum>QLineEdit::Normal</enum>
     </property>
     <property name="cursorPosition">
-     <number>0</number>
+     <number>18</number>
     </property>
     <property name="readOnly">
      <bool>false</bool>
@@ -135,10 +135,93 @@ background-color: rgb(85, 170, 127);</string>
      <enum>QFrame::Raised</enum>
     </property>
    </widget>
+   <widget class="QSlider" name="horizontalSlider">
+    <property name="geometry">
+     <rect>
+      <x>200</x>
+      <y>48</y>
+      <width>211</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="inputMethodHints">
+     <set>Qt::ImhNone</set>
+    </property>
+    <property name="minimum">
+     <number>2</number>
+    </property>
+    <property name="maximum">
+     <number>10</number>
+    </property>
+    <property name="sliderPosition">
+     <number>5</number>
+    </property>
+    <property name="tracking">
+     <bool>true</bool>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Horizontal</enum>
+    </property>
+    <property name="invertedAppearance">
+     <bool>false</bool>
+    </property>
+    <property name="invertedControls">
+     <bool>false</bool>
+    </property>
+    <property name="tickPosition">
+     <enum>QSlider::NoTicks</enum>
+    </property>
+    <property name="tickInterval">
+     <number>1</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="ratioLabel">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>46</y>
+      <width>31</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(170, 255, 255);
+background-color: rgb(85, 170, 255)</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>100</x>
+      <y>46</y>
+      <width>91</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">color: rgb(255, 255, 255);
+background-color: rgb(85, 170, 127);</string>
+    </property>
+    <property name="text">
+     <string>Reduction ratio</string>
+    </property>
+   </widget>
    <zorder>frame</zorder>
    <zorder>btnConvert</zorder>
    <zorder>traceViewer</zorder>
    <zorder>lineEditDirPath</zorder>
+   <zorder>horizontalSlider</zorder>
+   <zorder>ratioLabel</zorder>
+   <zorder>label</zorder>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
