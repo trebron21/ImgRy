@@ -135,7 +135,7 @@ background-color: rgb(85, 170, 127);</string>
      <enum>QFrame::Raised</enum>
     </property>
    </widget>
-   <widget class="QSlider" name="horizontalSlider">
+   <widget class="QSlider" name="imgRatioSlider">
     <property name="geometry">
      <rect>
       <x>200</x>
@@ -219,7 +219,7 @@ background-color: rgb(85, 170, 127);</string>
    <zorder>btnConvert</zorder>
    <zorder>traceViewer</zorder>
    <zorder>lineEditDirPath</zorder>
-   <zorder>horizontalSlider</zorder>
+   <zorder>imgRatioSlider</zorder>
    <zorder>ratioLabel</zorder>
    <zorder>label</zorder>
   </widget>

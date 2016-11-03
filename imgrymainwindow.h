@@ -1,12 +1,11 @@
-#ifndef IMGRYMAINWINDOW_H
-#define IMGRYMAINWINDOW_H
+#pragma once
 
 #include <QMainWindow>
 #include <thread>
 #include <mutex>
 #include <memory>
 
-class WorkerThread;
+class ImageResizer;
 
 namespace Ui
 {
@@ -24,9 +23,6 @@ class ImgRyMainWindow : public QMainWindow
 
     void writeTrace(QString text);
 
-    QVector<QString> filePaths;
-
-
   private slots:
     void on_btnConvert_clicked();
 
@@ -34,13 +30,7 @@ class ImgRyMainWindow : public QMainWindow
 
 
   private:
-    Ui::ImgRyMainWindow * ui;
+    Ui::ImgRyMainWindow * m_ui;
 
-    std::mutex traceMutex;
-
-    std::unique_ptr<WorkerThread> worker;
-
-    std::vector<std::thread> threadPool;
+    std::unique_ptr<ImageResizer> m_imageResizer;
 };
-
-#endif // IMGRYMAINWINDOW_H

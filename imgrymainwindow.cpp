@@ -1,72 +1,45 @@
 #include "imgrymainwindow.h"
 #include "ui_imgrymainwindow.h"
-#include "workerthread.h"
+#include "imageresizer.h"
 
-#include <QDirIterator>
-#include <QTime>
 #include <QDebug>
-
 
 ImgRyMainWindow::ImgRyMainWindow(QWidget *parent) :
   QMainWindow(parent),
-  ui(new Ui::ImgRyMainWindow()),
-  worker(new WorkerThread(*this))
+  m_ui(new Ui::ImgRyMainWindow()),
+  m_imageResizer(new ImageResizer())
 {
-  ui->setupUi(this);
-  ui->ratioLabel->setNum(ui->horizontalSlider->value());
+  m_ui->setupUi(this);
+  m_ui->ratioLabel->setNum(m_ui->imgRatioSlider->value());
 
-  QObject::connect(ui->horizontalSlider, SIGNAL(valueChanged(int)),
-                   ui->ratioLabel,       SLOT(setNum(int)));
+  QObject::connect(m_ui->imgRatioSlider, SIGNAL(valueChanged(int)),
+                   m_ui->ratioLabel,       SLOT(setNum(int)));
 
-  QObject::connect(worker.get(), SIGNAL(emitTrace(QString)),
+  QObject::connect(m_imageResizer.get(), SIGNAL(emitTrace(QString)),
                    this,         SLOT(realizeTrace(QString))/*, Qt::AutoConnection*/);
 }
 
 
 ImgRyMainWindow::~ImgRyMainWindow()
 {
-  delete ui;
+  // Stop the threads if they are still working
+  m_imageResizer->stop();
+
+  delete m_ui;
 }
 
 
 void ImgRyMainWindow::realizeTrace(QString text)
 {
-  QMetaObject::invokeMethod(ui->traceViewer, "append", Qt::AutoConnection, Q_ARG(QString, QTime::currentTime().toString() + " | " + text));
+  QMetaObject::invokeMethod(m_ui->traceViewer, "append", Qt::AutoConnection, Q_ARG(QString, text));
 
-//  std::lock_guard<std::mutex> trcLocker(traceMutex); // allegedly this does not work, because Qt's (UI) event loop does not know anything about my mutex
+//  Allegedly this does not work, because Qt's (UI) event loop does not know anything about this mutex
+//  std::lock_guard<std::mutex> trcLocker(m_traceMutex);
 //  ui->traceViewer->append(QTime::currentTime().toString() + " | " + text);
 }
 
 
 void ImgRyMainWindow::on_btnConvert_clicked()
 {
-  // Creating a list of filenames should not last too long, so we do it here,
-  // starting a thread for this would be inefficient and a bit of an overkill
-  QDirIterator dirIt(ui->lineEditDirPath->text(), QDirIterator::NoIteratorFlags);
-
-  while (dirIt.hasNext())
-  {
-    dirIt.next();
-
-    QFileInfo fileInfo = dirIt.filePath();
-
-    if (fileInfo.isFile())
-    {
-      if (fileInfo.suffix().toLower() == "jpg" || fileInfo.suffix().toLower() == "jpeg")
-      {
-        filePaths.append(fileInfo.absoluteFilePath());
-      }
-    }
-  }
-
-  // Launch a group of threads
-  auto const hwThreadCount = std::thread::hardware_concurrency();
-  auto const numThreads = (hwThreadCount != 0U) ? hwThreadCount : 2U;
-
-  for (auto i = 0U; i < numThreads; ++i)
-  {
-    threadPool.push_back(std::thread(&WorkerThread::run, worker.get(), ui->horizontalSlider->value()));
-  }
-
-// todo  std::for_each(threadPool.begin(), threadPool.end(), std::mem_fn(&std::thread::join));
+  m_imageResizer->start(m_ui->lineEditDirPath->text().toStdString(), m_ui->imgRatioSlider->value());
 }
