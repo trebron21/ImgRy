@@ -5,18 +5,33 @@
 #include <QString>
 #include <QTime>
 
+#include <atomic>
+#include <mutex>
+#include <queue>
 #include <sstream>
 #include <thread>
 
-
 namespace
 {
+  std::mutex m_filePathsMutex;
+  std::queue<std::string> m_filePathsQueue;
+
+  void enqueue(std::string filePath)
+  {
+    std::lock_guard<std::mutex> fileQueueLock(m_filePathsMutex);
+    m_filePathsQueue.push(filePath);
+  }
+
+  std::atomic<bool> m_keepRunning = true;
+
+  std::vector<std::thread> m_threadPool;
+
+
   auto currentTimeAsQString = []()
   {
     return QTime::currentTime().toString();
   };
 }
-
 
 void ImageResizer::run(uint8_t imageRatio)
 {
@@ -75,7 +90,6 @@ void ImageResizer::run(uint8_t imageRatio)
   }
 }
 
-
 void ImageResizer::start(std::string directoryPath, uint8_t imageRatio)
 {
   // Creating a list of filenames should not last too long, so we do it here,
@@ -101,17 +115,9 @@ void ImageResizer::start(std::string directoryPath, uint8_t imageRatio)
     m_threadPool.push_back(std::thread(&ImageResizer::run, this, imageRatio));
 }
 
-
 void ImageResizer::stop()
 {
   m_keepRunning = false;
 
   std::for_each(m_threadPool.begin(), m_threadPool.end(), std::mem_fn(&std::thread::join));
-}
-
-
-void ImageResizer::enqueue(std::string filePath)
-{
-  std::lock_guard<std::mutex> fileQueueLock(m_filePathsMutex);
-  m_filePathsQueue.push(filePath);
 }

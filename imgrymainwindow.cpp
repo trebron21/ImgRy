@@ -19,7 +19,6 @@ ImgRyMainWindow::ImgRyMainWindow(QWidget *parent) :
                    this,         SLOT(realizeTrace(QString))/*, Qt::AutoConnection*/);
 }
 
-
 ImgRyMainWindow::~ImgRyMainWindow()
 {
   // Stop the threads if they are still working
@@ -27,7 +26,6 @@ ImgRyMainWindow::~ImgRyMainWindow()
 
   delete m_ui;
 }
-
 
 void ImgRyMainWindow::realizeTrace(QString text)
 {
@@ -37,7 +35,6 @@ void ImgRyMainWindow::realizeTrace(QString text)
 //  std::lock_guard<std::mutex> trcLocker(m_traceMutex);
 //  ui->traceViewer->append(QTime::currentTime().toString() + " | " + text);
 }
-
 
 void ImgRyMainWindow::on_btnConvert_clicked()
 {
